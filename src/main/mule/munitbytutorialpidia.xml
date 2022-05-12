@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="f126ed95-cbea-4d6c-8f77-908c9ae3b5cd" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="2bc5427f-2a53-41de-b2b3-ba86f2c2ceed" >
+		<db:my-sql-connection host="127.0.0.1" port="3306" user="root" password="root" database="employee" />
+	</db:config>
+	<flow name="munitbytutorialpidiaFlow" doc:id="07b8f93f-3aac-4840-a3b3-51ede762aca6" >
+		<http:listener doc:name="Listener" doc:id="0d8e1226-9e98-4ebd-a229-2a093e218269" config-ref="HTTP_Listener_config" path="/test"/>
+		<set-variable value="#[attributes.queryParams.emp_id]" doc:name="Set Variable" doc:id="6bd736da-b52e-480b-aaf1-78879e6f0a1a" variableName="uid"/>
+		<db:select doc:id="81168c7f-2dd9-4f6f-b7d3-fccefeed8358" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT * FROM emp_appraisal WHERE emp_id= :vid]]></db:sql>
+			<db:input-parameters ><![CDATA[#[vid : vars.uid]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="b317ef5e-19c2-4a53-b6f3-f56e8c85455f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	</mule>
